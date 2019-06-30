@@ -1,0 +1,61 @@
+version: "3.7"
+services:
+  redis:
+    image: redis:5.0.5-alpine3.9
+    container_name: redis
+    expose:
+        - 6379
+    networks:
+        - app-network
+    restart: always
+    tty: true
+
+  db:
+    build: ./.docker/database
+    container_name: db
+    command: --innodb-use-native-aio=0
+    volumes:
+      - ./.docker/database/data:/var/lib/mysql
+    environment:
+      - MYSQL_USER=cms
+      - MYSQL_PASSWORD=secret
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=laravel_docker
+    ports:
+      - "3306:3306"
+    networks:
+      - app-network
+    restart: always
+    tty: true
+
+  app:
+    build: .
+    container_name: app
+    volumes:
+      - .:/var/www/
+    networks:
+      - app-network
+    restart: always
+    tty: true
+    depends_on:
+      - db
+      - redis
+
+  nginx:
+    build: ./.docker/nginx
+    container_name: nginx
+    volumes:
+      - .:/var/www
+    ports:
+      - "8000:80"
+    networks:
+      - app-network
+    restart: always
+    tty: true
+    depends_on:
+      - app
+
+networks:
+  app-network:
+    driver: bridge
+    name: app-network
