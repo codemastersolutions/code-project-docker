@@ -3,10 +3,11 @@ MAINTAINER "Gilson Gabriel <gilson@codemastersolucoes.com>"
 
 WORKDIR /var/www
 
-RUN apk add --no-cache openssl bash mysql-client \
+RUN apk add --no-cache openssl bash nano mysql-client \
     && docker-php-ext-install pdo pdo_mysql \
-    && curl -sS https://getcomposer.org/instaler | php -- --install-dir=/usr/local --filename=composer \
-    && rm -rf /var/www/html
+    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
+    && rm -rf /var/www/html \
+    && ln -s /usr/local/composer composer
 
 ENV DOCKERIZE_VERSION v0.6.1
 RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
